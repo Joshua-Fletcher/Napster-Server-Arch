@@ -2,6 +2,7 @@ import socket
 import threading
 import os
 import pathlib
+import copy
 
 fileNameTable = {
 
@@ -39,7 +40,7 @@ def handle_request(connection_socket):
     fileInfoRec = "PlacesHolder"
     while(fileInfoRec.upper() != "DONE"):
         fileInfoRec = connection_socket.recv(buffer_size).decode('utf-8')
-        if(fileInfoRec.upper() != "DONE"):
+        if((fileInfoRec.upper() != "DONE") and (fileInfoRec.upper() != "QUIT")):
             fileInfo = fileInfoRec.split(",")
             fileName = fileInfo[0]
             fileDesc = fileInfo[1]
@@ -51,16 +52,19 @@ def handle_request(connection_socket):
         command = connection_socket.recv(buffer_size).decode('utf-8')
 
         if command.upper() == "QUIT":
+
+            fileNameTable_copy = copy.copy(fileNameTable)
+            userTable_copy = copy.copy(userTable)
+
             for key, val in fileNameTable.items():
                 if val[1] == userName:
-                    del fileNameTable[key]
+                    del fileNameTable_copy[key]
 
             for key, val in userTable.items():
                 if key == userName:
-                    del userTable[key]
+                    del userTable_copy[key]
 
             print(userName + " Left")
-            connection_socket.close()
 
         else:
             searchResults = {}
@@ -81,6 +85,7 @@ def handle_request(connection_socket):
 
             data_socket.close()
 
+    connection_socket.close()
 
 while True:
     connection_socket, addr = server_socket.accept()

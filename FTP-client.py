@@ -72,25 +72,18 @@ def commandButtonClick():
     commandRequest = commandInput.get()
 
     ftp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    
-    if commandRequest.upper() == "QUIT":
-        quitMessage = "QUIT"
-        ftp_socket.send(quitMessage.encode('utf-8'))
-        ftp_socket.close()
 
-    elif "CONNECT" in commandRequest.upper():
-        connection_info = "CONNECT" + " " + data_ip + " " + str(data_port)
-        connect_request_array = commandRequest.split()
-        host_split = connect_request_array[1].split(":")
-        request_host_IP = host_split[0]
-        request_host_port = host_split[1]
-        ftp_socket.connect((request_host_IP, int(request_host_port)))
-        ftp_socket.send(connection_info.encode('utf-8'))
-
-    elif "GET" in commandRequest.upper():
-        ftp_socket.send(commandRequest.encode('utf-8'))
+    if "GET" in commandRequest.upper():
+        ftpLogBox.insert(1, commandRequest)
         connect_request_array = commandRequest.split()
         fileName = connect_request_array[1]
+        host_split = connect_request_array[2].split(":")
+        request_host_IP = host_split[0]
+        request_host_port = host_split[1]
+        server_request = "GET" + " " + fileName + " " + data_ip + " " + str(data_port)
+
+        ftp_socket.connect((request_host_IP, int(request_host_port)))
+        ftp_socket.send(server_request.encode('utf-8'))
 
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.bind((data_ip, data_port))
@@ -108,16 +101,22 @@ def commandButtonClick():
             print("Not a file on server")
 
         data_socket.close()
+    ftp_socket.close()
 
+def logoutButtonClick():
+    logout = "QUIT"
+    
+    client_socket.send(logout.encode('utf-8'))
 
 #create window and title
 window = tk.Tk()
 window.title("Napster Client")
+window.configure()
 
 #frame = tk.Frame(master=window, width=1000, height=500)
 
 #connection section label
-Label(text="Please Enter Your Personal Server IP, Port, Prefered Username, Hostname, and Connection Speed Below: ").grid(row=1,columnspan=5)
+Label(text="Please Enter the Follow Information to Connect: ").grid(row=1,columnspan=2)
 
 #server hostname label
 Label(text="Server Hostname:").grid(row=2, column=0)
@@ -127,7 +126,7 @@ serverHostName = tk.Entry()
 serverHostName.grid(row=2, column=1)
 
 #server port label
-Label(text="Port:").grid(row=2, column=2)
+Label(text="Server Port:").grid(row=2, column=2)
 
 #server port entry box
 serverPort = tk.Entry()
@@ -145,7 +144,7 @@ username = tk.Entry()
 username.grid(row=3, column=1)
 
 #personal hostname label
-Label(text="Hostname:").grid(row=3,column=2)
+Label(text="Data Hostname:").grid(row=3,column=2)
 
 #personal hostname entry box
 personal_hostname = tk.Entry()
@@ -194,7 +193,7 @@ fileListBox = tk.Listbox(width=80)
 fileListBox.grid(row=8, columnspan=6)
 
 #done file uploading button
-doneButton = tk.Button(text="Click when done uploading files and descriptions", command=doneClick, width=80)
+doneButton = tk.Button(text="Click when done uploading files and descriptions (MUST CLICK BEFORE KEYWORK SEARCH)", command=doneClick, width=80, bg="green", fg="white")
 doneButton.grid(row=9, columnspan=6)
 
 #filler labels
@@ -223,7 +222,7 @@ NetworkFileListBox.grid(row=14, columnspan=6)
 Label(text=" ").grid(row=15)
 
 #ftp section label
-Label(text="FTP").grid(row=16, column=0)
+Label(text="FTP Request (Ex: GET [filename.txt] localhost:2000").grid(row=16, column=0, columnspan=2)
 
 #command label
 Label(text="Enter Command:").grid(row=17, column=0)
@@ -236,5 +235,19 @@ commandInput.grid(row=17, column=1)
 commandButton = tk.Button(text="Go", command=commandButtonClick, width=30)
 commandButton.grid(row=17, column=2, columnspan=2)
 
+#ftp log
+ftpLogBox = tk.Listbox(width=80)
+ftpLogBox.grid(row=18, columnspan=6)
+
+#filler labels
+Label(text=" ").grid(row=19)
+
+#logout button
+logoutButton = tk.Button(text="Logout (Disconnect from index server)", command=logoutButtonClick, width=30, fg="white", bg="red")
+logoutButton.grid(row=20, columnspan=6)
+
+#filler labels
+Label(text=" ").grid(row=21)
+Label(text=" ").grid(row=22)
 
 window.mainloop()

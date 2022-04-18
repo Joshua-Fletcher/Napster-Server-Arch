@@ -44,6 +44,7 @@ def doneClick():
     client_socket.send(doneMessage.encode('utf-8'))
 
 def searchButtonClick():
+    NetworkFileListBox.delete(0,'end')
     keywordToSearch = keywordInput.get()
     
     client_socket.send(keywordToSearch.encode('utf-8'))

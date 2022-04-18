@@ -53,16 +53,15 @@ def handle_request(connection_socket):
 
         if command.upper() == "QUIT":
 
-            fileNameTable_copy = copy.copy(fileNameTable)
-            userTable_copy = copy.copy(userTable)
-
-            for key, val in fileNameTable.items():
+            for key, val in list(fileNameTable.items()):
                 if val[1] == userName:
-                    del fileNameTable_copy[key]
+                    print("deleted file")
+                    del fileNameTable[key]
 
-            for key, val in userTable.items():
+            for key, val in list(userTable.items()):
                 if key == userName:
-                    del userTable_copy[key]
+                    print("deleted user")
+                    del userTable[key]
 
             print(userName + " Left")
 
